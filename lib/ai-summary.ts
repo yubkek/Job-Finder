@@ -3,12 +3,30 @@ import { sleep } from './http-client';
 import { logger } from './logger';
 import type { NormalizedJob } from '@/types';
 
-let openai: OpenAI | null = null;
+let client: OpenAI | null = null;
 
 function getClient(): OpenAI | null {
-  if (!process.env.OPENAI_API_KEY) return null;
-  if (!openai) openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  return openai;
+  if (client) return client;
+
+  if (process.env.GROQ_API_KEY) {
+    client = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: 'https://api.groq.com/openai/v1',
+    });
+    return client;
+  }
+
+  if (process.env.OPENAI_API_KEY) {
+    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    return client;
+  }
+
+  return null;
+}
+
+function getModel(): string {
+  if (process.env.GROQ_API_KEY) return 'llama3-8b-8192';
+  return 'gpt-4o-mini';
 }
 
 const SYSTEM_PROMPT = `You are a concise job description summariser for Australian tech job seekers.
@@ -36,7 +54,7 @@ export async function generateSummary(
 
   try {
     const completion = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: getModel(),
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         {
@@ -64,7 +82,7 @@ export async function generateSummaries(
   delayMs = 500,
 ): Promise<NormalizedJob[]> {
   if (!getClient()) {
-    logger.info('[ai-summary] OPENAI_API_KEY not set — skipping summaries');
+    logger.info('[ai-summary] No GROQ_API_KEY or OPENAI_API_KEY set — skipping summaries');
     return jobs;
   }
 
