@@ -39,6 +39,9 @@ const INTERNSHIP_KEYWORDS = [
 const GRADUATE_KEYWORDS = [
   'graduate', 'grad role', 'junior', 'entry level', 'entry-level',
   'new grad', 'early career', 'associate', 'recent graduate',
+  'technology graduate', 'engineering graduate', 'software graduate',
+  'data graduate', '0-2 years', '0 - 2 years', 'no experience required',
+  'fresh graduate', 'campus hire', 'vacation scholarship',
 ];
 
 // ─── Location keyword maps ────────────────────────────────────────────────────
@@ -133,6 +136,19 @@ export function normalizeJob(raw: RawJob): NormalizedJob {
   };
 }
 
+/**
+ * Returns true only if the job is:
+ * 1. In a recognised tech role (not OTHER), AND
+ * 2. An internship OR a graduate/junior/entry-level role
+ *
+ * This keeps unrelated jobs (sales, marketing, trades, etc.) out of the DB.
+ */
+function isRelevant(job: NormalizedJob): boolean {
+  const isTechRole = !(job.roleTypes.length === 1 && job.roleTypes[0] === 'OTHER');
+  const isEntryLevel = job.isInternship || job.isGraduate;
+  return isTechRole && isEntryLevel;
+}
+
 export function normalizeJobs(raws: RawJob[]): NormalizedJob[] {
-  return raws.map(normalizeJob);
+  return raws.map(normalizeJob).filter(isRelevant);
 }

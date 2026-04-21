@@ -62,9 +62,8 @@ export class AdzunaAdapter extends BaseAdapter {
               results_per_page: this.resultsPerPage,
               what: term,
               where: city,
-              'content-type': 'application/json',
               sort_by: 'date',
-              days_old: 30,
+              max_days_old: 30,
             },
           });
 
