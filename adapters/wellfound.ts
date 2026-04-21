@@ -27,7 +27,15 @@ export class WellfoundAdapter extends BaseAdapter {
     super(config);
   }
 
-  async fetchJobs(location: 'sydney' | 'melbourne'): Promise<RawJob[]> {
+  async fetchJobs(_location: 'sydney' | 'melbourne'): Promise<RawJob[]> {
+    // Wellfound uses Cloudflare bot protection — all requests return 403.
+    // Disabled until Playwright support is added.
+    logger.warn('[wellfound] Blocked by Cloudflare — skipping');
+    return [];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async _fetchJobs(location: 'sydney' | 'melbourne'): Promise<RawJob[]> {
     const jobs: RawJob[] = [];
     const city = location === 'sydney' ? 'Sydney%2C+Australia' : 'Melbourne%2C+Australia';
 

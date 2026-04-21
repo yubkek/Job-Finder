@@ -31,6 +31,29 @@ const ROLE_KEYWORDS: Record<RoleType, string[]> = {
   OTHER: [],
 };
 
+// Jobs mentioning these → treat as explicitly low experience (good)
+const LOW_EXPERIENCE_KEYWORDS = [
+  '0-1 year', '0 - 1 year', '0-2 year', '0 - 2 year',
+  '1+ year', '1-2 year', '1 to 2 year',
+  '2+ year', '2-3 year', '2 years experience', '1 year experience',
+  'no experience required', 'no experience needed', 'no prior experience',
+  'without experience', 'less than 2 years',
+];
+
+// Jobs mentioning these → senior/mid-level, exclude unless also intern/grad flagged
+const SENIORITY_EXCLUSIONS = [
+  'senior ', 'sr.', ' sr ', 'lead developer', 'lead engineer', 'lead data',
+  'tech lead', 'team lead', 'engineering lead', 'principal ', 'staff engineer',
+  'staff developer', 'engineering manager', 'product manager', 'project manager',
+  'director', 'head of engineering', 'head of technology', 'head of data',
+  'head of product', 'vp of', 'vice president', 'chief ', 'cto', 'cio', 'cpo',
+  '3+ years', '4+ years', '5+ years', '6+ years', '7+ years', '8+ years',
+  '9+ years', '10+ years', '3 years experience', '4 years experience',
+  '5 years experience', 'minimum 3 years', 'minimum of 3', 'at least 3 years',
+  'minimum 4 years', 'at least 4 years', 'minimum 5 years', 'at least 5 years',
+  'minimum 3+ years', 'minimum 4+ years',
+];
+
 const INTERNSHIP_KEYWORDS = [
   'intern', 'internship', 'placement', 'work experience', 'co-op',
   'vacation scholar', 'cadet', 'trainee', 'apprentice', 'summer program',
@@ -90,12 +113,14 @@ function detectRoleTypes(title: string, description: string): RoleType[] {
 }
 
 /** Detect location tags from the location string */
-function detectLocationTags(location: string): LocationTag[] {
+function detectLocationTags(location: string, description = ''): LocationTag[] {
+  // Check both the location field and description (some jobs say "based in Sydney" in body)
+  const haystack = `${location} ${description}`.toLowerCase();
   const tags: LocationTag[] = [];
   for (const [tag, keywords] of Object.entries(LOCATION_KEYWORDS) as [LocationTag, string[]][]) {
-    if (containsAny(location, keywords)) tags.push(tag);
+    if (containsAny(haystack, keywords)) tags.push(tag);
   }
-  return tags.length > 0 ? tags : [];
+  return tags;
 }
 
 /** Parse a loosely-formatted date string into a Date object */
@@ -130,7 +155,7 @@ export function normalizeJob(raw: RawJob): NormalizedJob {
     urlHash: hashUrl(raw.url),
     datePosted: parseDate(raw.datePosted),
     roleTypes: detectRoleTypes(title, description),
-    locationTags: detectLocationTags(location),
+    locationTags: detectLocationTags(location, description),
     isInternship: containsAny(haystack, INTERNSHIP_KEYWORDS),
     isGraduate: containsAny(haystack, GRADUATE_KEYWORDS),
   };
@@ -144,9 +169,27 @@ export function normalizeJob(raw: RawJob): NormalizedJob {
  * This keeps unrelated jobs (sales, marketing, trades, etc.) out of the DB.
  */
 function isRelevant(job: NormalizedJob): boolean {
+  // Must be in Sydney, Melbourne, or Remote-AU — drop jobs from other cities/countries
+  const hasAULocation = job.locationTags.length > 0;
+  if (!hasAULocation) return false;
+
+  // Must be a recognised tech discipline
   const isTechRole = !(job.roleTypes.length === 1 && job.roleTypes[0] === 'OTHER');
-  const isEntryLevel = job.isInternship || job.isGraduate;
-  return isTechRole && isEntryLevel;
+  if (!isTechRole) return false;
+
+  // Explicitly labelled intern/grad — always include
+  if (job.isInternship || job.isGraduate) return true;
+
+  const haystack = `${job.title} ${job.description}`.toLowerCase();
+
+  // Explicitly mentions low experience requirement — include
+  if (containsAny(haystack, LOW_EXPERIENCE_KEYWORDS)) return true;
+
+  // Explicitly senior/mid-level — exclude
+  if (containsAny(haystack, SENIORITY_EXCLUSIONS)) return false;
+
+  // No experience level specified at all → assume open to juniors, include
+  return true;
 }
 
 export function normalizeJobs(raws: RawJob[]): NormalizedJob[] {

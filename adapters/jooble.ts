@@ -23,12 +23,19 @@ interface JoobleResponse {
 }
 
 const SEARCH_TERMS = [
+  // Explicit entry-level
   'graduate software engineer',
   'junior developer',
   'software intern',
   'data analyst graduate',
   'machine learning intern',
   'entry level developer',
+  // Broader — normaliser will filter out senior roles
+  'software engineer',
+  'data analyst',
+  'data engineer',
+  'machine learning engineer',
+  'frontend developer',
 ];
 
 export class JoobleAdapter extends BaseAdapter {

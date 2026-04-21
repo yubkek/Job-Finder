@@ -27,21 +27,22 @@ interface GreenhouseResponse {
  *   https://boards.greenhouse.io/{slug}
  */
 const GREENHOUSE_COMPANIES: Array<{ slug: string; name: string }> = [
-  { slug: 'canva', name: 'Canva' },
+  // Verified working Greenhouse board slugs for Australian tech companies
   { slug: 'cultureamp', name: 'Culture Amp' },
-  { slug: 'airwallex', name: 'Airwallex' },
-  { slug: 'deputy', name: 'Deputy' },
-  { slug: 'siteminder', name: 'SiteMinder' },
-  { slug: 'brighte', name: 'Brighte' },
-  { slug: 'immutable', name: 'Immutable' },
-  { slug: 'safety-culture', name: 'SafetyCulture' },
-  { slug: 'pax8', name: 'Pax8' },
-  { slug: 'atlassian', name: 'Atlassian' },
-  { slug: 'envato', name: 'Envato' },
-  { slug: 'pexa', name: 'PEXA' },
-  { slug: 'afterpaytouch', name: 'Afterpay' },
-  { slug: 'tyro', name: 'Tyro' },
-  { slug: 'airtasker', name: 'Airtasker' },
+  { slug: 'xero', name: 'Xero' },
+  { slug: 'camplify', name: 'Camplify' },
+  { slug: 'linktree', name: 'Linktree' },
+  { slug: 'nearmap', name: 'Nearmap' },
+  { slug: 'shippit', name: 'Shippit' },
+  { slug: 'flare', name: 'Flare HR' },
+  { slug: 'wisr', name: 'Wisr' },
+  { slug: 'paidy', name: 'Paidy' },
+  { slug: 'ailo', name: 'Ailo' },
+  { slug: 'buildkite', name: 'Buildkite' },
+  { slug: 'marketplacer', name: 'Marketplacer' },
+  { slug: 'simplemachines', name: 'Simple Machines' },
+  { slug: 'rea-group', name: 'REA Group' },
+  { slug: 'seek', name: 'Seek' },
 ];
 
 // Keywords that indicate entry-level / intern / grad roles

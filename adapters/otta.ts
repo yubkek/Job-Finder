@@ -19,7 +19,15 @@ export class OttaAdapter extends BaseAdapter {
     super(config);
   }
 
-  async fetchJobs(location: 'sydney' | 'melbourne'): Promise<RawJob[]> {
+  async fetchJobs(_location: 'sydney' | 'melbourne'): Promise<RawJob[]> {
+    // Otta was acquired by Beamery — the app.otta.com search endpoint now
+    // returns 404. Disabled until a working API/URL is identified.
+    logger.warn('[otta] Endpoint unavailable (acquired by Beamery) — skipping');
+    return [];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async _fetchJobs(location: 'sydney' | 'melbourne'): Promise<RawJob[]> {
     const jobs: RawJob[] = [];
     const city = this.locationToCity(location);
 

@@ -21,6 +21,7 @@ interface AdzunaResponse {
 
 // ─── Search terms for entry-level / grad / intern roles ───────────────────────
 const SEARCH_TERMS = [
+  // Explicit entry-level
   'graduate software engineer',
   'junior software developer',
   'software engineer intern',
@@ -28,6 +29,14 @@ const SEARCH_TERMS = [
   'machine learning graduate',
   'junior developer',
   'entry level engineer',
+  // Broader — normaliser will filter out senior roles
+  'software engineer',
+  'data analyst',
+  'data engineer',
+  'machine learning engineer',
+  'frontend developer',
+  'backend developer',
+  'full stack developer',
 ];
 
 export class AdzunaAdapter extends BaseAdapter {
@@ -60,10 +69,9 @@ export class AdzunaAdapter extends BaseAdapter {
               app_id: this.appId,
               app_key: this.appKey,
               results_per_page: this.resultsPerPage,
-              what: term,
+              what_and: term,
               where: city,
               sort_by: 'date',
-              max_days_old: 30,
             },
           });
 
