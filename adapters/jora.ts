@@ -27,7 +27,15 @@ export class JoraAdapter extends BaseAdapter {
         try {
           const url = `https://au.jora.com/jobs?q=${encodeURIComponent(term)}&l=${cityParam}&p=${page}`;
           const html = await fetchWithRetry<string>(url, {
-            headers: { Accept: 'text/html' },
+            headers: {
+              Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+              Referer: 'https://au.jora.com/',
+              'Sec-Fetch-Dest': 'document',
+              'Sec-Fetch-Mode': 'navigate',
+              'Sec-Fetch-Site': 'same-origin',
+              'Sec-Fetch-User': '?1',
+              'Cache-Control': 'max-age=0',
+            },
           });
 
           const $ = load(html);

@@ -4,13 +4,16 @@ import { logger } from './logger';
 // ─── Realistic browser-like headers to reduce bot detection ──────────────────
 const DEFAULT_HEADERS: Record<string, string> = {
   'User-Agent':
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36',
   Accept:
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-  'Accept-Language': 'en-AU,en;q=0.9',
+  'Accept-Language': 'en-AU,en-GB;q=0.9,en;q=0.8',
   'Accept-Encoding': 'gzip, deflate, br',
   Connection: 'keep-alive',
   'Upgrade-Insecure-Requests': '1',
+  'Sec-Ch-Ua': '"Google Chrome";v="135", "Chromium";v="135", "Not-A.Brand";v="99"',
+  'Sec-Ch-Ua-Mobile': '?0',
+  'Sec-Ch-Ua-Platform': '"Windows"',
 };
 
 // ─── Shared Axios instance ────────────────────────────────────────────────────
