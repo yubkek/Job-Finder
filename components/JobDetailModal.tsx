@@ -1,7 +1,8 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Building2, Calendar, ExternalLink, MapPin, Sparkles, X } from 'lucide-react';
+import { Building2, Calendar, ExternalLink, Loader2, MapPin, Sparkles, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,6 +24,30 @@ const ROLE_BADGE_COLORS: Record<string, string> = {
 };
 
 export function JobDetailModal({ job, onClose }: JobDetailModalProps) {
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const fetchedId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!job) { setSummary(null); fetchedId.current = null; return; }
+
+    // Use cached summary from DB if available
+    if (job.summary) { setSummary(job.summary); return; }
+
+    // Avoid re-fetching the same job if already requested
+    if (fetchedId.current === job.id) return;
+    fetchedId.current = job.id;
+
+    setSummary(null);
+    setSummaryLoading(true);
+
+    fetch(`/api/jobs/${job.id}/summary`, { method: 'POST' })
+      .then((r) => r.json())
+      .then((data) => setSummary(data.summary ?? null))
+      .catch(() => setSummary(null))
+      .finally(() => setSummaryLoading(false));
+  }, [job]);
+
   return (
     <AnimatePresence>
       {job && (
@@ -110,15 +135,26 @@ export function JobDetailModal({ job, onClose }: JobDetailModalProps) {
                 </div>
 
                 {/* AI Summary */}
-                {job.summary && (
+                {(summaryLoading || summary) && (
                   <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Sparkles className="h-4 w-4 text-amber-500" />
                       <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">
                         AI Summary
                       </span>
+                      {summaryLoading && (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500 ml-auto" />
+                      )}
                     </div>
-                    <p className="text-sm text-foreground leading-relaxed">{job.summary}</p>
+                    {summaryLoading ? (
+                      <div className="space-y-2">
+                        <div className="h-3 bg-amber-200/60 dark:bg-amber-800/40 rounded animate-pulse w-full" />
+                        <div className="h-3 bg-amber-200/60 dark:bg-amber-800/40 rounded animate-pulse w-5/6" />
+                        <div className="h-3 bg-amber-200/60 dark:bg-amber-800/40 rounded animate-pulse w-4/6" />
+                      </div>
+                    ) : (
+                      <p className="text-sm text-foreground leading-relaxed">{summary}</p>
+                    )}
                   </div>
                 )}
 

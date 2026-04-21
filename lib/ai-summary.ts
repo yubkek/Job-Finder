@@ -25,7 +25,7 @@ function getClient(): OpenAI | null {
 }
 
 function getModel(): string {
-  if (process.env.GROQ_API_KEY) return 'llama3-8b-8192';
+  if (process.env.GROQ_API_KEY) return 'llama-3.1-8b-instant';
   return 'gpt-4o-mini';
 }
 
