@@ -1,0 +1,70 @@
+// Prisma schema for Job Finder AU
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Use pooled connection for Next.js API routes (PgBouncer)
+  url       = env("DATABASE_URL")
+  // Use direct connection for Prisma migrate/push
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Main jobs table ──────────────────────────────────────────────────────────
+model Job {
+  id           String    @id @default(cuid())
+  /// Identifier on the source platform (e.g. Adzuna job ID, Greenhouse job ID)
+  externalId   String?
+  /// Which platform this job came from
+  source       String
+  title        String
+  company      String
+  location     String
+  /// Full HTML-stripped description
+  description  String?   @db.Text
+  /// 2-4 sentence AI-generated summary
+  summary      String?   @db.Text
+  url          String
+  /// SHA-256 hash of the normalised URL — used for deduplication
+  urlHash      String    @unique
+  datePosted   DateTime?
+  /// e.g. ["SE", "DATA", "ML"]
+  roleTypes    String[]
+  /// e.g. ["SYDNEY", "MELBOURNE"]
+  locationTags String[]
+  isInternship Boolean   @default(false)
+  isGraduate   Boolean   @default(false)
+  isBookmarked Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([source])
+  @@index([datePosted(sort: Desc)])
+  @@index([isInternship])
+  @@index([isGraduate])
+  @@index([isBookmarked])
+  @@map("jobs")
+}
+
+// ─── Scraper run logs ─────────────────────────────────────────────────────────
+model ScraperLog {
+  id         String   @id @default(cuid())
+  source     String
+  /// "success" | "partial" | "error"
+  status     String
+  jobsFound  Int      @default(0)
+  jobsAdded  Int      @default(0)
+  /// JSON-serialised array of error messages
+  errors     String?  @db.Text
+  startedAt  DateTime
+  endedAt    DateTime @default(now())
+  durationMs Int      @default(0)
+
+  @@index([source])
+  @@index([status])
+  @@index([startedAt(sort: Desc)])
+  @@map("scraper_logs")
+}
